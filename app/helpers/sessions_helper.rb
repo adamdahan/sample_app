@@ -5,6 +5,11 @@ module SessionsHelper
     session[:user_id] = user.id
   end
 
+  # Returns true if the given user is the current user.
+  def current_user?(user)
+    user == current_user
+  end
+
   #  we’ll follow a common Ruby convention by storing the result of User.find_by in an instance variable, which hits the database the first time but returns the instance variable immediately on subsequent invocations
   def current_user
     if session[:user_id]
@@ -42,5 +47,16 @@ module SessionsHelper
     user.remember
     cookies.permanent.signed[:user_id] = user.id
     cookies.permanent[:remember_token] = user.remember_token
+  end
+
+  # Redirects to stored location (or to the default).
+  def redirect_back_or(default)
+    redirect_to(session[:forwarding_url] || default)
+    session.delete(:forwarding_url)
+  end
+
+  # Stores the URL trying to be accessed.
+  def store_location
+    session[:forwarding_url] = request.original_url if request.get?
   end
 end
