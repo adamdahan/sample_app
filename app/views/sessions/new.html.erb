@@ -19,6 +19,8 @@
 
       <%= f.submit "Log in", class: "btn btn-primary" %>
     <% end %>
+	
+	<%= link_to "Facebook Login", '/auth/facebook' %>
 
     <p>New user? <%= link_to "Sign up now!", signup_path %></p>
   </div>
