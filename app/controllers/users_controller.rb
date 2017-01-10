@@ -9,7 +9,27 @@ class UsersController < ApplicationController
   end
 
   def new
+    credentials = request.env['omniauth.auth']['credentials']
+    token = credentials["token"]
+    expires = credentials["expires_at"]
+
     @user = User.new
+    @user.token = token
+    @user.expires = Time.at(expires)
+
+    # add token to user
+    # add expire to user
+    # use @user credientials to pass to User.koala(auth)
+    fbuser = User.koala(credentials) #fbid #picture
+    #retrieve any potential profile data we can use to populate signup form
+
+    unless fbuser["email"].nil?
+      @user.email = fbuser["email"]
+    end
+
+    @user.name = fbuser["name"]
+    @user.facebook_id = fbuser["id"]
+    @user.picture = fbuser["picture"]["data"]["url"].to_s
   end
 
   def show
@@ -18,8 +38,12 @@ class UsersController < ApplicationController
 
   def create
     @user = User.new(user_params)
+    @user.token = params["token"]
+    @user.facebook_id = params["facebook_id"]
+    @user.expires = params["expires"]
+    @user.picture = params["picture"]
     if @user.save
-      @user.send_activation_email
+       @user.send_activation_email
       flash[:info] = "Please check your email to activate your account."
       redirect_to root_url
     else
@@ -51,7 +75,7 @@ class UsersController < ApplicationController
 
     def user_params
       params.require(:user).permit(:name, :email, :password,
-                                   :password_confirmation)
+                                   :password_confirmation, :token, :facebook_id, :expires, :picture)
     end
 
     # Before filters
