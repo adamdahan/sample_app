@@ -35,12 +35,6 @@ class User < ActiveRecord::Base
     end
   end
 
-  def User.koala(auth)
-    access_token = auth['token']
-    facebook = Koala::Facebook::API.new(access_token)
-    facebook.get_object("me?fields=name,picture")
-  end
-
   # Remembers a user in the database for use in persistent sessions.
   def remember
     self.remember_token = User.new_token
